@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rapsodo Analytics</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0B1829;--navy2:#112240;--blue:#1D6FE8;--blue2:#4A90D9;
+  --cyan:#00D4FF;--gold:#F5C842;--green:#2ECC71;--red:#E74C3C;
+  --white:#F0F4FF;--gray:#8899BB;--border:rgba(0,212,255,0.15);
+  --card:rgba(17,34,64,0.8);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--navy);color:var(--white);font-family:'Noto Sans JP',sans-serif;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,212,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,0.04) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+.wrap{max-width:1200px;margin:0 auto;padding:0 20px;position:relative;z-index:1}
+
+/* header */
+header{padding:20px 0 16px;border-bottom:1px solid var(--border);margin-bottom:24px}
+.hdr{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.logo{display:flex;align-items:center;gap:12px}
+.logo-icon{width:44px;height:44px;background:linear-gradient(135deg,var(--blue),var(--cyan));border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--navy)}
+.logo-text{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:3px;line-height:1}
+.logo-sub{font-size:10px;color:var(--gray);letter-spacing:2px;font-family:'DM Mono',monospace;margin-top:2px}
+.team-badge{background:rgba(29,111,232,0.2);border:1px solid rgba(29,111,232,0.4);border-radius:8px;padding:5px 14px;font-size:13px;color:var(--blue2);font-weight:500}
+
+/* nav */
+nav{display:flex;gap:4px;margin-bottom:24px;overflow-x:auto;padding-bottom:2px}
+.nb{padding:8px 18px;border-radius:8px;font-size:13px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--gray);font-family:'Noto Sans JP',sans-serif;white-space:nowrap;transition:all 0.15s}
+.nb:hover{border-color:var(--cyan);color:var(--white)}
+.nb.on{background:rgba(0,212,255,0.1);border-color:var(--cyan);color:var(--cyan);font-weight:500}
+
+/* views */
+.view{display:none}
+.view.on{display:block}
+
+/* kpi */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;position:relative;overflow:hidden;backdrop-filter:blur(8px)}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.kpi.bl::before{background:linear-gradient(90deg,var(--blue),var(--cyan))}
+.kpi.gd::before{background:linear-gradient(90deg,var(--gold),#f97316)}
+.kpi.gr::before{background:linear-gradient(90deg,var(--green),#06d6a0)}
+.kpi.rd::before{background:linear-gradient(90deg,var(--red),#e91e8c)}
+.kpi-lbl{font-size:10px;color:var(--gray);letter-spacing:1px;margin-bottom:6px;font-family:'DM Mono',monospace}
+.kpi-val{font-family:'Bebas Neue',sans-serif;font-size:38px;letter-spacing:2px;line-height:1;margin-bottom:4px}
+.kpi-u{font-size:12px;color:var(--gray);margin-left:3px}
+.kpi-d{font-size:11px;font-family:'DM Mono',monospace;margin-top:4px;color:var(--gray)}
+.kpi-d.up{color:var(--green)}.kpi-d.dn{color:var(--red)}
+
+/* cards */
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;backdrop-filter:blur(8px);margin-bottom:20px}
+.card-title{font-size:11px;color:var(--gray);letter-spacing:1px;margin-bottom:14px;font-family:'DM Mono',monospace}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:20px}
+.full{grid-column:1/-1}
+.sec{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:3px;color:var(--cyan);margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.sec::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* rank table */
+.rt{width:100%;border-collapse:collapse}
+.rt th{font-size:10px;color:var(--gray);font-family:'DM Mono',monospace;letter-spacing:1px;padding:8px 10px;text-align:left;border-bottom:1px solid var(--border)}
+.rt td{padding:9px 10px;font-size:13px;border-bottom:1px solid rgba(0,212,255,0.05)}
+.rt tr:hover td{background:rgba(0,212,255,0.03)}
+.rn{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--gray)}
+.rn.g{color:var(--gold)}.rn.s{color:#94a3b8}.rn.b{color:#cd7c2f}
+.vv{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--cyan)}
+.dv{font-family:'DM Mono',monospace;font-size:11px}
+.dv.up{color:var(--green)}.dv.dn{color:var(--red)}
+.pb{display:inline-block;font-size:10px;padding:1px 6px;border-radius:4px;margin-right:2px;font-family:'DM Mono',monospace;font-weight:500}
+.pb-fs{background:rgba(29,111,232,0.25);color:var(--blue2)}
+.pb-sl{background:rgba(46,204,113,0.2);color:#2ecc71}
+.pb-cu{background:rgba(245,200,66,0.2);color:var(--gold)}
+.pb-ch{background:rgba(231,76,60,0.2);color:var(--red)}
+.mbar{height:5px;background:rgba(255,255,255,0.07);border-radius:3px;overflow:hidden;width:80px}
+.mbf{height:5px;border-radius:3px;background:linear-gradient(90deg,var(--blue),var(--cyan))}
+
+/* upload */
+.upzone{background:var(--card);border:2px dashed rgba(0,212,255,0.3);border-radius:12px;padding:36px;text-align:center;cursor:pointer;transition:all 0.15s;margin-bottom:20px}
+.upzone:hover{border-color:var(--cyan);background:rgba(0,212,255,0.04)}
+.up-title{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;margin-bottom:6px}
+.up-sub{font-size:13px;color:var(--gray)}
+.up-btn{margin-top:14px;padding:9px 24px;background:linear-gradient(135deg,var(--blue),var(--cyan));border:none;border-radius:8px;color:var(--navy);font-weight:700;font-size:13px;cursor:pointer;font-family:'Noto Sans JP',sans-serif}
+
+/* ai */
+.ai-btn{padding:10px 22px;background:linear-gradient(135deg,var(--blue),var(--cyan));border:none;border-radius:8px;color:var(--navy);font-weight:700;font-size:13px;cursor:pointer;font-family:'Noto Sans JP',sans-serif;margin-top:10px}
+.ai-btn:disabled{opacity:0.4;cursor:not-allowed}
+.ai-result{background:rgba(0,0,0,0.3);border-radius:8px;padding:14px;font-size:13px;line-height:1.8;min-height:60px;white-space:pre-wrap}
+
+/* settings */
+.s-label{font-size:11px;color:var(--gray);font-family:'DM Mono',monospace;display:block;margin-bottom:5px;letter-spacing:1px}
+.s-input{width:100%;padding:9px 12px;background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:8px;color:var(--white);font-size:14px;font-family:'Noto Sans JP',sans-serif;margin-bottom:14px}
+.s-input:focus{outline:none;border-color:var(--cyan)}
+.s-select{width:100%;padding:9px 12px;background:var(--navy2);border:1px solid var(--border);border-radius:8px;color:var(--white);font-size:14px;font-family:'Noto Sans JP',sans-serif;margin-bottom:14px}
+.s-save{padding:10px 22px;background:linear-gradient(135deg,var(--blue),var(--cyan));border:none;border-radius:8px;color:var(--navy);font-weight:700;font-size:13px;cursor:pointer;font-family:'Noto Sans JP',sans-serif}
+.s-del{padding:10px 22px;background:transparent;border:1px solid var(--red);border-radius:8px;color:var(--red);font-size:13px;cursor:pointer;font-family:'Noto Sans JP',sans-serif;margin-left:10px}
+
+/* growth */
+.grow-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(0,212,255,0.05)}
+.grow-row:last-child{border-bottom:none}
+.grow-name{width:96px;font-size:13px;font-weight:500;flex-shrink:0}
+.grow-bar{flex:1;height:7px;background:rgba(255,255,255,0.07);border-radius:4px;overflow:hidden}
+.grow-fill{height:7px;border-radius:4px;background:linear-gradient(90deg,var(--blue),var(--cyan))}
+.grow-val{width:56px;text-align:right;font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--green);flex-shrink:0}
+.grow-from{width:80px;text-align:right;font-size:11px;color:var(--gray);font-family:'DM Mono',monospace;flex-shrink:0}
+
+/* status */
+.status-ok{font-size:13px;color:var(--green);line-height:2}
+.status-err{font-size:13px;color:var(--red)}
+
+footer{margin-top:40px;padding:16px 0;border-top:1px solid var(--border);text-align:center;font-size:11px;color:var(--gray);font-family:'DM Mono',monospace}
+
+@media(max-width:700px){
+  .kpi-grid{grid-template-columns:1fr 1fr}
+  .row2{grid-template-columns:1fr}
+  .full{grid-column:auto}
+  .kpi-val{font-size:28px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="hdr">
+    <div class="logo">
+      <div class="logo-icon">R2</div>
+      <div>
+        <div class="logo-text">RAPSODO 2.0</div>
+        <div class="logo-sub">PITCHING ANALYTICS</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px">
+      <div class="team-badge" id="teamName">チーム名未設定</div>
+      <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--gray)" id="todayDate"></div>
+    </div>
+  </div>
+</header>
+
+<nav>
+  <button class="nb on"  onclick="go('dashboard',this)">ダッシュボード</button>
+  <button class="nb"     onclick="go('ranking',this)">ランキング</button>
+  <button class="nb"     onclick="go('growth',this)">成長トラッキング</button>
+  <button class="nb"     onclick="go('upload',this)">CSVアップロード</button>
+  <button class="nb"     onclick="go('settings',this)">設定</button>
+</nav>
+
+<!-- ダッシュボード -->
+<div id="v-dashboard" class="view on">
+  <div class="kpi-grid">
+    <div class="kpi bl"><div class="kpi-lbl">TEAM AVG VELOCITY</div><div class="kpi-val" id="k-velo" style="color:var(--cyan)">—<span class="kpi-u">km/h</span></div><div class="kpi-d" id="k-velo-d">測定データなし</div></div>
+    <div class="kpi gd"><div class="kpi-lbl">TEAM AVG SPIN RATE</div><div class="kpi-val" id="k-spin" style="color:var(--gold)">—<span class="kpi-u">rpm</span></div><div class="kpi-d" id="k-spin-d">測定データなし</div></div>
+    <div class="kpi gr"><div class="kpi-lbl">MAX VELOCITY</div><div class="kpi-val" id="k-max" style="color:var(--green)">—<span class="kpi-u">km/h</span></div><div class="kpi-d" id="k-maxp">—</div></div>
+    <div class="kpi rd"><div class="kpi-lbl">PLAYERS</div><div class="kpi-val" id="k-cnt" style="color:#e91e8c">—<span class="kpi-u">名</span></div><div class="kpi-d" id="k-sess">第—回</div></div>
+  </div>
+  <div class="row2">
+    <div class="card"><div class="card-title">// VELOCITY DISTRIBUTION</div><div style="position:relative;height:230px"><canvas id="cVelo"></canvas></div></div>
+    <div class="card"><div class="card-title">// PITCH TYPE RATE</div><div style="position:relative;height:230px"><canvas id="cPitch"></canvas></div></div>
+    <div class="card full"><div class="card-title">// VELOCITY × SPIN SCATTER</div><div style="position:relative;height:250px"><canvas id="cScatter"></canvas></div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">// AI TEAM ANALYSIS</div>
+    <div class="ai-result" id="aiResult">CSVをアップロードするとAI分析が実行できます。</div>
+    <button class="ai-btn" id="aiBtn" onclick="runAI()" disabled>チーム全体をAI分析する</button>
+  </div>
+</div>
+
+<!-- ランキング -->
+<div id="v-ranking" class="view">
+  <div class="sec">PLAYER RANKING</div>
+  <div class="card">
+    <table class="rt">
+      <thead><tr><th>RANK</th><th>選手名</th><th>球速</th><th>回転数</th><th>球種</th><th>vs平均</th><th>BAR</th></tr></thead>
+      <tbody id="rankBody"><tr><td colspan="7" style="text-align:center;color:var(--gray);padding:28px;font-size:13px">CSVデータをアップロードしてください</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 成長トラッキング -->
+<div id="v-growth" class="view">
+  <div class="sec">GROWTH TRACKING</div>
+  <div class="card"><div class="card-title">// VELOCITY TREND</div><div style="position:relative;height:280px"><canvas id="cGrowth"></canvas></div></div>
+  <div class="card"><div class="card-title">// GROWTH RANKING</div><div id="growthRank" style="padding:4px 0"><div style="text-align:center;color:var(--gray);padding:20px;font-size:13px">複数回の測定データが必要です</div></div></div>
+</div>
+
+<!-- CSV -->
+<div id="v-upload" class="view">
+  <div class="sec">CSV UPLOAD</div>
+  <div class="upzone" onclick="document.getElementById('csvIn').click()" id="dropZone">
+    <div style="font-size:32px;margin-bottom:8px;opacity:0.6">📁</div>
+    <div class="up-title">DROP CSV FILE HERE</div>
+    <div class="up-sub">ラプソード2.0からエクスポートしたCSVをアップロード</div>
+    <button class="up-btn">ファイルを選択</button>
+    <input type="file" id="csvIn" accept=".csv" style="display:none" onchange="handleCSV(this)">
+  </div>
+  <div class="card">
+    <div class="card-title">// EXPECTED COLUMNS</div>
+    <div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gray);line-height:2">
+      <span style="color:var(--cyan)">対応カラム：</span><br>
+      PitcherName, PitchType, Speed(km/h), SpinRate(rpm), Tilt,<br>
+      SpinEfficiency(%), InducedVertBreak(cm), HorizBreak(cm),<br>
+      Extension(m), ReleaseHeight(m), ReleaseSide(cm)
+    </div>
+  </div>
+  <div id="upStatus" style="display:none" class="card">
+    <div class="card-title">// UPLOAD RESULT</div>
+    <div id="upMsg"></div>
+  </div>
+</div>
+
+<!-- 設定 -->
+<div id="v-settings" class="view">
+  <div class="sec">SETTINGS</div>
+  <div class="card">
+    <div class="card-title">// TEAM CONFIG</div>
+    <label class="s-label">TEAM NAME</label>
+    <input class="s-input" id="sTeam" placeholder="例：東北高校">
+    <label class="s-label">SESSION</label>
+    <select class="s-select" id="sSess">
+      <option>第1回（2月）</option><option>第2回（4月）</option><option>第3回（6月）</option>
+      <option>第4回（9月）</option><option>第5回（11月）</option><option>第6回（1月）</option>
+    </select>
+    <label class="s-label">TEAM TYPE</label>
+    <select class="s-select" id="sType">
+      <option>高校生（年6回推奨）</option><option>中学生（年4回推奨）</option>
+    </select>
+    <button class="s-save" onclick="saveSettings()">設定を保存</button>
+    <button class="s-del" onclick="exportJSON()">📥 データ書き出し</button>
+    <button class="s-del" onclick="clearAll()">🗑️ リセット</button>
+  </div>
+</div>
+
+<footer>RAPSODO 2.0 ANALYTICS &nbsp;|&nbsp; POWERED BY CLAUDE AI &nbsp;|&nbsp; <span id="fyear"></span></footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+// ─── state ───────────────────────────────────
+const SK='rapsodo_d', SS='rapsodo_s';
+let D={sessions:[],players:[]};
+let S={teamName:'チーム名未設定',session:'第1回（2月）',type:'高校生'};
+let charts={};
+
+// ─── init ────────────────────────────────────
+document.addEventListener('DOMContentLoaded',()=>{
+  try{const d=localStorage.getItem(SK);if(d)D=JSON.parse(d)}catch(e){}
+  try{const s=localStorage.getItem(SS);if(s)S={...S,...JSON.parse(s)}}catch(e){}
+  document.getElementById('todayDate').textContent=new Date().toISOString().slice(0,10).replace(/-/g,'.');
+  document.getElementById('fyear').textContent=new Date().getFullYear();
+  applyS();
+  renderDash();
+
+  const dz=document.getElementById('dropZone');
+  dz.addEventListener('dragover',e=>{e.preventDefault();dz.style.borderColor='var(--cyan)'});
+  dz.addEventListener('dragleave',()=>{dz.style.borderColor=''});
+  dz.addEventListener('drop',e=>{
+    e.preventDefault();dz.style.borderColor='';
+    const f=e.dataTransfer.files[0];
+    if(f&&f.name.toLowerCase().endsWith('.csv'))procFile(f);
+  });
+});
+
+// ─── navigation ──────────────────────────────
+function go(id,btn){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
+  document.getElementById('v-'+id).classList.add('on');
+  btn.classList.add('on');
+  if(id==='dashboard')renderDash();
+  if(id==='ranking')renderRank();
+  if(id==='growth')renderGrowth();
+}
+
+// ─── settings ────────────────────────────────
+function applyS(){
+  document.getElementById('teamName').textContent=S.teamName;
+  document.getElementById('sTeam').value=S.teamName;
+  document.getElementById('sSess').value=S.session;
+  document.getElementById('sType').value=S.type;
+}
+function saveSettings(){
+  S.teamName=document.getElementById('sTeam').value||'チーム名未設定';
+  S.session=document.getElementById('sSess').value;
+  S.type=document.getElementById('sType').value;
+  localStorage.setItem(SS,JSON.stringify(S));
+  applyS();
+  alert('設定を保存しました。');
+}
+function exportJSON(){
+  const b=new Blob([JSON.stringify(D,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(b);
+  a.download='rapsodo_'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();
+}
+function clearAll(){
+  if(confirm('全データを削除しますか？')){{D={sessions:[],players:[]};localStorage.removeItem(SK);location.reload();}}
+}
+
+// ─── CSV ─────────────────────────────────────
+function handleCSV(inp){const f=inp.files[0];if(f)procFile(f);}
+function procFile(file){
+  const r=new FileReader();
+  r.onload=e=>{
+    const res=parseCSV(e.target.result);
+    if(res.players.length>0){
+      D.sessions.push({id:Date.now(),label:S.session,date:new Date().toISOString().slice(0,10),players:res.players});
+      res.players.forEach(p=>{if(!D.players.find(x=>x.name===p.name))D.players.push({name:p.name,grade:p.grade||''})});
+      localStorage.setItem(SK,JSON.stringify(D));
+      showStatus(res.players.length,res.cols);
+      document.getElementById('aiBtn').disabled=false;
+      renderDash();
+    }else showStatus(0,[]);
+  };
+  r.readAsText(file,'UTF-8');
+}
+function parseCSV(text){
+  const lines=text.trim().split('\n').filter(l=>l.trim());
+  if(lines.length<2)return{players:[],cols:[]};
+  const sep=lines[0].includes('\t')?'\t':',';
+  const hdrs=lines[0].split(sep).map(h=>h.trim().replace(/^"|"$/g,'').toLowerCase());
+  const M={
+    name:['pitchername','選手名','name','pitcher'],
+    pt:['pitchtype','球種','pitch_type','type'],
+    velo:['speed','velocity','球速','speed(km/h)'],
+    spin:['spinrate','回転数','spin_rate','rpm'],
+    tilt:['tilt','回転軸','spin direction'],
+    eff:['spinefficiency','回転効率','efficiency','spin efficiency'],
+    vb:['inducedvertbreak','縦変化','vert break','vertical'],
+    hb:['horizbreak','横変化','horiz break','horizontal'],
+    ext:['extension','伸び','ext'],
+    relH:['releaseheight','リリース高さ','release height'],
+    relS:['releaseside','リリース左右','release side'],
+    grade:['grade','学年','year'],
+  };
+  const cols={};
+  for(const[k,keys]of Object.entries(M)){
+    cols[k]=keys.reduce((a,k2)=>{if(a>=0)return a;const i=hdrs.findIndex(h=>h.includes(k2));return i},  -1);
+  }
+  const players={};
+  for(let i=1;i<lines.length;i++){
+    const row=lines[i].split(sep).map(v=>v.trim().replace(/^"|"$/g,''));
+    const name=cols.name>=0?row[cols.name]:`選手${i}`;
+    if(!name)continue;
+    if(!players[name])players[name]={name,grade:'',pitches:{}};
+    const ptype=cols.pt>=0?normPT(row[cols.pt]):'fs';
+    if(!players[name].pitches[ptype])players[name].pitches[ptype]=[];
+    const entry={};
+    for(const[f,idx]of Object.entries(cols)){if(idx>=0&&row[idx]){const v=parseFloat(row[idx]);entry[f]=isNaN(v)?row[idx]:v;}}
+    players[name].pitches[ptype].push(entry);
+    if(cols.grade>=0&&row[cols.grade])players[name].grade=row[cols.grade];
+  }
+  const result=Object.values(players).map(p=>{
+    const ap={};
+    for(const[pt,entries]of Object.entries(p.pitches)){
+      const av=f=>{const vs=entries.map(e=>e[f]).filter(v=>typeof v==='number');return vs.length?Math.round(vs.reduce((a,b)=>a+b,0)/vs.length*10)/10:null};
+      ap[pt]={velo:av('velo'),spin:av('spin'),tilt:entries[0]?.tilt||null,eff:av('eff'),vb:av('vb'),hb:av('hb'),ext:av('ext'),relH:av('relH'),relS:av('relS')};
+    }
+    return{name:p.name,grade:p.grade,pitches:ap};
+  });
+  return{players:result,cols:Object.keys(cols).filter(k=>cols[k]>=0)};
+}
+function normPT(raw){
+  if(!raw)return'fs';const r=raw.toLowerCase();
+  if(r.includes('four')||r.includes('4')||r.includes('直')||r==='fb'||r==='fs')return'fs';
+  if(r.includes('slide')||r.includes('sl')||r.includes('スライ'))return'sl';
+  if(r.includes('curve')||r.includes('cu')||r.includes('カーブ'))return'cu';
+  if(r.includes('change')||r.includes('ch')||r.includes('チェン'))return'ch';
+  if(r.includes('two')||r.includes('2s'))return'2s';
+  if(r.includes('cut')||r.includes('ct'))return'ct';
+  return'fs';
+}
+function showStatus(cnt,cols){
+  const a=document.getElementById('upStatus'),m=document.getElementById('upMsg');
+  a.style.display='';
+  if(cnt>0){m.className='status-ok';m.innerHTML=`✅ アップロード成功<br>選手数: <strong>${cnt}名</strong><br>カラム: ${cols.join(', ')}<br>セッション: <strong>${S.session}</strong> として保存しました。`;}
+  else{m.className='status-err';m.textContent='❌ データを読み込めませんでした。CSVのカラム名を確認してください。';}
+}
+
+// ─── helpers ─────────────────────────────────
+const avg=arr=>{const v=arr.filter(x=>typeof x==='number'&&!isNaN(x));return v.length?Math.round(v.reduce((a,b)=>a+b,0)/v.length*10)/10:0};
+const latest=()=>D.sessions[D.sessions.length-1]||null;
+const prev=()=>D.sessions.length>=2?D.sessions[D.sessions.length-2]:null;
+
+// ─── dashboard ───────────────────────────────
+function renderDash(){
+  const L=latest();
+  if(!L)return;
+  const fp=L.players.filter(p=>p.pitches.fs);
+  const velos=fp.map(p=>p.pitches.fs.velo).filter(Boolean);
+  const spins=fp.map(p=>p.pitches.fs.spin).filter(Boolean);
+  const aV=avg(velos),aS=avg(spins),mV=Math.max(...velos);
+  const mp=fp.find(p=>p.pitches.fs.velo===mV);
+  document.getElementById('k-velo').innerHTML=`${aV}<span class="kpi-u">km/h</span>`;
+  document.getElementById('k-spin').innerHTML=`${Math.round(aS)}<span class="kpi-u">rpm</span>`;
+  document.getElementById('k-max').innerHTML=`${mV}<span class="kpi-u">km/h</span>`;
+  document.getElementById('k-cnt').innerHTML=`${L.players.length}<span class="kpi-u">名</span>`;
+  document.getElementById('k-maxp').textContent=mp?.name||'—';
+  document.getElementById('k-sess').textContent=L.label;
+  const P=prev();
+  if(P){
+    const pV=avg(P.players.filter(p=>p.pitches.fs).map(p=>p.pitches.fs.velo).filter(Boolean));
+    const d=Math.round((aV-pV)*10)/10;
+    const el=document.getElementById('k-velo-d');
+    el.textContent=`${d>0?'+':''}${d} km/h vs 前回`;
+    el.className=`kpi-d ${d>0?'up':d<0?'dn':''}`;
+  }
+  buildVeloChart(L,aV);
+  buildPitchChart(L);
+  buildScatterChart(L);
+  document.getElementById('aiBtn').disabled=false;
+}
+
+function buildVeloChart(L,aV){
+  const ctx=document.getElementById('cVelo');
+  if(charts.velo)charts.velo.destroy();
+  const sorted=[...L.players].filter(p=>p.pitches.fs?.velo).sort((a,b)=>b.pitches.fs.velo-a.pitches.fs.velo);
+  charts.velo=new Chart(ctx,{type:'bar',data:{
+    labels:sorted.map(p=>p.name.split(' ')[0]||p.name),
+    datasets:[
+      {data:sorted.map(p=>p.pitches.fs.velo),backgroundColor:sorted.map(p=>p.pitches.fs.velo>=aV?'rgba(0,212,255,0.55)':'rgba(29,111,232,0.35)'),borderColor:sorted.map(p=>p.pitches.fs.velo>=aV?'#00D4FF':'#1D6FE8'),borderWidth:1,borderRadius:3},
+      {data:sorted.map(()=>aV),type:'line',borderColor:'rgba(245,200,66,0.8)',borderWidth:2,borderDash:[5,4],pointRadius:0,fill:false}
+    ]
+  },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#8899BB',font:{size:10}},grid:{display:false}},y:{ticks:{color:'#8899BB',font:{size:10}},grid:{color:'rgba(0,212,255,0.05)'}}}}});
+}
+
+function buildPitchChart(L){
+  const ctx=document.getElementById('cPitch');
+  if(charts.pitch)charts.pitch.destroy();
+  const total=L.players.length;
+  const c={fs:0,sl:0,cu:0,ch:0,'2s':0,ct:0};
+  L.players.forEach(p=>Object.keys(p.pitches).forEach(k=>{if(c[k]!==undefined)c[k]++}));
+  const lbls=['4S','SL','CU','CH','2S','CT'];
+  const data=[c.fs,c.sl,c.cu,c.ch,c['2s'],c.ct];
+  const clrs=['#1D6FE8','#2ECC71','#F5C842','#E74C3C','#9B59B6','#1ABC9C'];
+  const fi=data.map((v,i)=>({v,l:lbls[i],c:clrs[i]})).filter(x=>x.v>0);
+  charts.pitch=new Chart(ctx,{type:'doughnut',data:{labels:fi.map(x=>x.l),datasets:[{data:fi.map(x=>x.v),backgroundColor:fi.map(x=>x.c),borderColor:'#0B1829',borderWidth:3,hoverOffset:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#8899BB',font:{size:11},boxWidth:11}},tooltip:{callbacks:{label:c=>`${c.label}: ${c.raw}名 (${Math.round(c.raw/total*100)}%)`}}}}});
+}
+
+function buildScatterChart(L){
+  const ctx=document.getElementById('cScatter');
+  if(charts.scatter)charts.scatter.destroy();
+  const gc={'1':'#F5C842','2':'#2ECC71','3':'#00D4FF','':'#8899BB'};
+  const ds=['3','2','1',''].map(g=>({
+    label:g?`${g}年生`:'その他',
+    data:L.players.filter(p=>p.grade===g&&p.pitches.fs?.velo&&p.pitches.fs?.spin).map(p=>({x:p.pitches.fs.velo,y:p.pitches.fs.spin,name:p.name})),
+    backgroundColor:gc[g]+'BB',borderColor:gc[g],pointRadius:7,pointHoverRadius:9
+  })).filter(d=>d.data.length>0);
+  charts.scatter=new Chart(ctx,{type:'scatter',data:{datasets:ds},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8899BB',font:{size:10},boxWidth:9}},tooltip:{callbacks:{label:c=>`${c.raw.name} ${c.raw.x}km/h ${c.raw.y}rpm`}}},scales:{x:{title:{display:true,text:'球速 (km/h)',color:'#8899BB',font:{size:10}},ticks:{color:'#8899BB',font:{size:10}},grid:{color:'rgba(0,212,255,0.05)'}},y:{title:{display:true,text:'回転数 (rpm)',color:'#8899BB',font:{size:10}},ticks:{color:'#8899BB',font:{size:10},callback:v=>v.toLocaleString()},grid:{color:'rgba(0,212,255,0.05)'}}}}});
+}
+
+// ─── ranking ─────────────────────────────────
+function renderRank(){
+  const L=latest();const tb=document.getElementById('rankBody');
+  if(!L){tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--gray);padding:28px;font-size:13px">データなし</td></tr>';return;}
+  const fp=[...L.players].filter(p=>p.pitches.fs?.velo).sort((a,b)=>b.pitches.fs.velo-a.pitches.fs.velo);
+  const aV=avg(fp.map(p=>p.pitches.fs.velo)),mV=Math.max(...fp.map(p=>p.pitches.fs.velo)),miV=Math.min(...fp.map(p=>p.pitches.fs.velo));
+  const PLBL={fs:'4S',sl:'SL',cu:'CU',ch:'CH','2s':'2S',ct:'CT'};
+  const PCLS={fs:'pb-fs',sl:'pb-sl',cu:'pb-cu',ch:'pb-ch'};
+  tb.innerHTML=fp.map((p,i)=>{
+    const v=p.pitches.fs.velo,s=p.pitches.fs.spin;
+    const d=Math.round((v-aV)*10)/10;
+    const pct=Math.round((v-miV)/(mV-miV+1)*100);
+    const nc=i===0?'g':i===1?'s':i===2?'b':'';
+    const badges=Object.keys(p.pitches).map(k=>`<span class="pb ${PCLS[k]||'pb-fs'}">${PLBL[k]||k.toUpperCase()}</span>`).join('');
+    return`<tr><td><span class="rn ${nc}">${i+1}</span></td><td><strong>${p.name}</strong>${p.grade?` <span style="font-size:11px;color:var(--gray);font-family:'DM Mono',monospace">${p.grade}年</span>`:''}</td><td><span class="vv">${v}</span><span style="font-size:10px;color:var(--gray)"> km/h</span></td><td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--gray)">${s?s.toLocaleString():'—'}</td><td>${badges}</td><td><span class="dv ${d>0?'up':d<0?'dn':''}">${d>0?'+':''}${d}</span></td><td><div class="mbar"><div class="mbf" style="width:${pct}%"></div></div></td></tr>`;
+  }).join('');
+}
+
+// ─── growth ──────────────────────────────────
+function renderGrowth(){
+  if(!D.sessions.length)return;
+  const names=[...new Set(D.sessions.flatMap(s=>s.players.map(p=>p.name)))];
+  const clrs=['#00D4FF','#2ECC71','#F5C842','#E74C3C','#9B59B6','#1ABC9C','#E67E22','#3498DB','#E91E8C','#F1C40F','#27AE60','#8E44AD'];
+  const ctx=document.getElementById('cGrowth');
+  if(charts.growth)charts.growth.destroy();
+  charts.growth=new Chart(ctx,{type:'line',data:{
+    labels:D.sessions.map(s=>s.label),
+    datasets:names.slice(0,12).map((n,i)=>({
+      label:n,
+      data:D.sessions.map(s=>s.players.find(p=>p.name===n)?.pitches?.fs?.velo||null),
+      borderColor:clrs[i%clrs.length],backgroundColor:'transparent',tension:0.3,pointRadius:4,borderWidth:2,spanGaps:true
+    }))
+  },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#8899BB',font:{size:10},boxWidth:8}},tooltip:{mode:'index',intersect:false}},scales:{x:{ticks:{color:'#8899BB',font:{size:10}},grid:{display:false}},y:{ticks:{color:'#8899BB',font:{size:10}},grid:{color:'rgba(0,212,255,0.05)'}}}}});
+
+  const first=D.sessions[0],last=D.sessions[D.sessions.length-1];
+  const ranked=names.map(n=>{
+    const f=first.players.find(p=>p.name===n)?.pitches?.fs?.velo;
+    const l=last.players.find(p=>p.name===n)?.pitches?.fs?.velo;
+    return{name:n,from:f,to:l,g:f&&l?Math.round((l-f)*10)/10:null};
+  }).filter(p=>p.g!==null).sort((a,b)=>b.g-a.g);
+  const mg=ranked[0]?.g||1;
+  document.getElementById('growthRank').innerHTML=ranked.length?ranked.map((p,i)=>`
+    <div class="grow-row">
+      <div style="width:22px;font-size:12px;color:var(--gray);text-align:center;flex-shrink:0">${i+1}</div>
+      <div class="grow-name">${p.name}</div>
+      <div class="grow-bar"><div class="grow-fill" style="width:${Math.max(p.g/mg*100,2)}%"></div></div>
+      <div class="grow-val">+${p.g}</div>
+      <div class="grow-from">${p.from}→${p.to}</div>
+    </div>`).join(''):'<div style="text-align:center;color:var(--gray);padding:20px;font-size:13px">複数回の測定データが必要です</div>';
+}
+
+// ─── AI ──────────────────────────────────────
+async function runAI(){
+  const L=latest();if(!L)return;
+  const btn=document.getElementById('aiBtn');
+  btn.disabled=true;btn.textContent='分析中...';
+  const box=document.getElementById('aiResult');
+  box.textContent='AIが分析しています...';
+  const fp=L.players.filter(p=>p.pitches.fs);
+  const aV=avg(fp.map(p=>p.pitches.fs.velo).filter(Boolean));
+  const aS=avg(fp.map(p=>p.pitches.fs.spin).filter(Boolean));
+  const pc={};L.players.forEach(p=>Object.keys(p.pitches).forEach(k=>{pc[k]=(pc[k]||0)+1}));
+  const pn={fs:'フォーシーム',sl:'スライダー',cu:'カーブ',ch:'チェンジアップ','2s':'ツーシーム',ct:'カット'};
+  const prompt=`あなたは野球ピッチングアナリストです。以下のラプソード2.0データをもとにコーチ向け分析レポートを日本語で作成してください。
+
+【チーム名】${S.teamName}（${S.type}）【測定回】${L.label}【選手数】${L.players.length}名
+【フォーシーム平均】球速:${aV}km/h　回転数:${Math.round(aS)}rpm
+【球種保有】${Object.entries(pc).map(([k,v])=>`${pn[k]||k}:${v}名`).join('、')}
+【全選手データ】${fp.map(p=>`${p.name}:${p.pitches.fs.velo}km/h,${p.pitches.fs.spin}rpm`).join(' / ')}
+
+1.チームの強み 2.優先課題3点 3.注目選手 4.練習提案 5.一言総評`;
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    const d=await r.json();
+    box.textContent=d.content?.find(b=>b.type==='text')?.text||'エラーが発生しました。';
+  }catch(e){box.textContent='通信エラーが発生しました。';}
+  btn.disabled=false;btn.textContent='チーム全体をAI分析する';
+}
+</script>
+</body>
+</html>
